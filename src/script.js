@@ -1,6 +1,6 @@
-console.log('hello')
+const $ = document.querySelector.bind(document)
 
-function getConfigFor(method, params) {
+function RPC(method, params) {
   return {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -11,17 +11,25 @@ function getConfigFor(method, params) {
   }
 }
 
-async function addNumbers() {
-  const response = await fetch('/rpc', getConfigFor('add', { a: 5, b: 3 }))
+async function ADD({ a, b }) {
+  const response = await fetch('/rpc', RPC('add', { a, b }))
 
   const data = await response.json()
 
-  console.log('RPC Response:', data)
+  return data
 }
 
-const btn = document.getElementById('rpcButton')
+const CALCULATOR = {
+  ADD
+}
 
-console.log('btn', btn)
-btn.addEventListener('click', () => {
-  addNumbers()
+const btn = $('#rpcButton')
+btn.addEventListener('click', async () => {
+  const sum1 = Number($('#sum1').value)
+  const sum2 = Number($('#sum2').value)
+  if (!sum1 || !sum2) return
+
+  const response = await CALCULATOR.ADD({ a: sum1, b: sum2 })
+  const resultNode = $('#resultValue')
+  resultNode.textContent = JSON.stringify(response.result, null, 2)
 })

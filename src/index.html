@@ -4,12 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hello!</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>This is an RPC test!</h1>
+  <p>Sum with RPC call:</p>
   <div>
-    Click the button to send an RPC request to the server.
+    <div class="box">
+      <input type="number" name="sum1" id="sum1">
+      <p>+</p>
+      <input type="number" name="sum2" id="sum2">
+    </div>
     <button id="rpcButton">Send RPC Request</button>
+
+    <div id="result">
+      Result: <span id="resultValue">N/A</span>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>
