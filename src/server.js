@@ -1,5 +1,6 @@
 const http = require('node:http')
 const fs = require('node:fs/promises')
+const path = require('node:path')
 
 const PORT = 3000
 
@@ -12,26 +13,34 @@ const procedures = {
   }
 }
 
+let htmlContent = null
+let jsContent = null
+
 /**
  * @param {import('node:http').IncomingMessage} req
  * @param {import('node:http').ServerResponse} res
  */
 async function handleRequest(req, res) {
   // Content-length not handled for simplicity
-  const { url, method, headers: requestHeaders } = req
+  const { url, headers: requestHeaders } = req
 
-  const writeHead = (code, ct) => res.writeHead(code, { 'Content-Type': ct })
-
-  if (url === '/') {
-    writeHead(200, 'text/html')
-    const html = await fs.readFile('index.html', 'utf-8')
-    res.end(html)
-  } else if (url === '/rpc') {
-    writeHead(200, 'application/json')
-    return handleRPCRequest(req, res)
+  if (!htmlContent || !jsContent) {
+    htmlContent = await fs.readFile(path.join(__dirname, 'index.html'), 'utf-8')
+    jsContent = await fs.readFile(path.join(__dirname, 'script.js'), 'utf-8')
   }
 
-  writeHead(400, 'text/plain')
+  if (url === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/html' })
+    return res.end(htmlContent)
+  } else if (url === '/rpc') {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    return handleRPCRequest(req, res)
+  } else if (url === '/script.js') {
+    res.writeHead(200, { 'Content-Type': 'application/javascript' })
+    return res.end(jsContent)
+  }
+
+  res.writeHead(400, { 'Content-Type': 'text/plain' })
   res.end('Bad Request')
 }
 
@@ -40,6 +49,13 @@ async function handleRequest(req, res) {
  * @param {import('node:http').ServerResponse} res
  */
 async function handleRPCRequest(req, res) {
+  let body = ''
+  for await (const chunk of req) {
+    body += chunk
+  }
+  req.body = JSON.parse(body)
+  console.log('RPC Request received', req.body)
+
   const { method, params } = req.body
 
   if (!procedures[method]) {
@@ -50,7 +66,8 @@ async function handleRPCRequest(req, res) {
 
   procedures[method](params)
     .then(result => {
-      res.writeHead(200, { 'Content-Type': 'application/json' })
+      // res.writeHead(200, { 'Content-Type': 'application/json' })a
+      console.log('RPC Call result', result)
       res.end(JSON.stringify({ result }))
     })
     .catch(error => {
