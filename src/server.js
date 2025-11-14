@@ -19,7 +19,7 @@ let cssContent = null
  * @param {import('node:http').ServerResponse} res
  */
 async function requestHandler(request, res) {
-  const { url, headers: requestHeaders } = request
+  const { url } = request
 
   if (url === '/rpc') return RPCRequest(request, res)
 
