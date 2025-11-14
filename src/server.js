@@ -26,6 +26,10 @@ async function requestHandler(request, res) {
   return staticRequest(url, res)
 }
 
+/**
+ * @param {string} url
+ * @param {import('node:http').ServerResponse} res
+ */
 async function staticRequest(url, res) {
   if (!htmlContent || !jsContent || !cssContent) {
     htmlContent = await fs.readFile(path.join(__dirname, 'index.html'), 'utf-8')
